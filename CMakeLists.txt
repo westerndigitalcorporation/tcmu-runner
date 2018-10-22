@@ -11,7 +11,7 @@ set(tcmu-runner_HANDLER_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/tc
 option(with-glfs "build Gluster glfs handler" true)
 option(with-qcow "build qcow handler" true)
 option(with-rbd "build Ceph rbd handler" true)
-option(with-zbc "build zbc handler" true)
+option(with-zbc "build zbc and dhsmr handlers" true)
 
 find_library(LIBNL_LIB nl-3)
 find_library(LIBNL_GENL_LIB nl-genl-3)
@@ -189,6 +189,21 @@ if (with-zbc)
 	  PUBLIC ${PROJECT_SOURCE_DIR}/ccan
 	  )
 	install(TARGETS handler_file_zbc DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcmu-runner)
+
+	# Stuff for building the file dhsmr handler
+	add_library(handler_file_dhsmr
+	  SHARED
+	  file_dhsmr.c
+	  )
+	set_target_properties(handler_file_dhsmr
+	  PROPERTIES
+	  PREFIX ""
+	  )
+	target_include_directories(handler_file_dhsmr
+	  PUBLIC ${PROJECT_SOURCE_DIR}/ccan
+	  )
+	install(TARGETS handler_file_dhsmr DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcmu-runner)
+
 endif (with-zbc)
 
 if (with-rbd)

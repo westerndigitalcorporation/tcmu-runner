@@ -2,10 +2,10 @@ Name:          tcmu-runner
 Summary:       A daemon that handles the userspace side of the LIO TCM-User backstore
 Group:         System Environment/Kernel
 License:       Apache 2.0 or LGPLv2.1
-Version:       1.3.0
+Version:       1.4.0
 URL:           https://github.com/open-iscsi/tcmu-runner
 
-%define _RC rc4
+#%define _RC
 Release:       %{?_RC:%{_RC}}%{dist}
 BuildRoot:     %(mktemp -udp %{_tmppath}/%{name}-%{version}%{?_RC:-%{_RC}})
 Source:       %{name}-%{version}%{?_RC:-%{_RC}}.tar.gz
@@ -15,7 +15,7 @@ BuildRequires: cmake make gcc
 BuildRequires: libnl3-devel glib2-devel zlib-devel kmod-devel
 BuildRequires: glusterfs-api-devel librados2-devel librbd1-devel
 
-Requires(pre): librados2, librbd1, kmod, zlib, libnl3, glib2, glusterfs-api
+Requires(pre): librados2, librbd1, kmod, zlib, libnl3, glib2, glusterfs-api, logrotate
 
 %description
 A daemon that handles the userspace side of the LIO TCM-User backstore.
@@ -50,6 +50,8 @@ userspace libraries they like.
 %{__make} DESTDIR=%{buildroot} install
 %{__mkdir} -p %{buildroot}/etc/tcmu/
 %{__install} -m 644 tcmu.conf %{buildroot}/etc/tcmu/
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d/
+%{__install} -m 644 logrotate.conf %{buildroot}%{_sysconfdir}/logrotate.d/tcmu-runner
 
 %clean
 %{__rm} -rf ${buldroot}
@@ -71,6 +73,7 @@ userspace libraries they like.
 %{_usr}/lib64/*
 %dir %{_sysconfdir}/tcmu/
 %config %{_sysconfdir}/tcmu/tcmu.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/tcmu-runner
 
 %changelog
 * Tue Oct 31 2017 Xiubo Li <lixiubo@cmss.chinamobile.com> - 1.3.0-rc4

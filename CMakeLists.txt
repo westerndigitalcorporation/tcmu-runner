@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8 FATAL_ERROR)
 project (tcmu-runner C)
-set(VERSION 1.4.0-rc1)
+set(VERSION 1.4.0)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall -Wdeclaration-after-statement -std=c99")
 
 include(GNUInstallDirs)
@@ -11,6 +11,7 @@ set(tcmu-runner_HANDLER_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/tc
 option(with-glfs "build Gluster glfs handler" true)
 option(with-qcow "build qcow handler" true)
 option(with-rbd "build Ceph rbd handler" true)
+option(with-zbc "build zbc handler" true)
 
 find_library(LIBNL_LIB nl-3)
 find_library(LIBNL_GENL_LIB nl-genl-3)
@@ -168,25 +169,27 @@ target_include_directories(handler_file_optical
   )
 target_link_libraries(handler_file_optical ${PTHREAD})
 
-# Stuff for building the file zbc handler
-add_library(handler_file_zbc
-  SHARED
-  file_zbc.c
-  )
-set_target_properties(handler_file_zbc
-  PROPERTIES
-  PREFIX ""
-  )
-target_include_directories(handler_file_zbc
-  PUBLIC ${PROJECT_SOURCE_DIR}/ccan
-  )
-install(TARGETS handler_file_zbc DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcmu-runner)
-
 # The minimal library consumer
 add_executable(consumer
   consumer.c
   )
 target_link_libraries(consumer tcmu)
+
+if (with-zbc)
+	# Stuff for building the file zbc handler
+	add_library(handler_file_zbc
+	  SHARED
+	  file_zbc.c
+	  )
+	set_target_properties(handler_file_zbc
+	  PROPERTIES
+	  PREFIX ""
+	  )
+	target_include_directories(handler_file_zbc
+	  PUBLIC ${PROJECT_SOURCE_DIR}/ccan
+	  )
+	install(TARGETS handler_file_zbc DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcmu-runner)
+endif (with-zbc)
 
 if (with-rbd)
 	find_library(LIBRBD rbd)
@@ -271,6 +274,12 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/tcmu.conf_install.cmake"
   )
 install(SCRIPT tcmu.conf_install.cmake)
+
+configure_file (
+  "${PROJECT_SOURCE_DIR}/logrotate.conf_install.cmake.in"
+  "${PROJECT_SOURCE_DIR}/logrotate.conf_install.cmake"
+  )
+install(SCRIPT logrotate.conf_install.cmake)
 
 install(FILES org.kernel.TCMUService1.service
   DESTINATION /usr/share/dbus-1/system-services)

@@ -1,3 +1,9 @@
+The current release branch is zone_domains_rc1. It is intended to conform to
+Zone Domains Rev.5 (T13 f18129r5).
+
+TODO add more Zone Domains implementation notes here. Move these notes from the
+top to an appropriate section below when ready to merge to fio mainline.
+
 # tcmu-runner
 
 A daemon that handles the userspace side of the LIO TCM-User backstore.
